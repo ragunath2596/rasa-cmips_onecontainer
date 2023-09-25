@@ -1,0 +1,50 @@
+version: "3.1"
+
+stories:      
+- story: interactive_story_1
+  steps:
+  - intent: greet
+  - action: utter_welcome
+  - action: caller_validation_form
+  - active_loop: caller_validation_form
+  - slot_was_set:
+    - requested_slot: slot_user_type
+  - intent: user_type
+    entities:
+    - entity_user_type: provider
+  - slot_was_set:
+    - slot_user_type: provider
+  - slot_was_set:
+    - requested_slot: slot_provider_number
+  - intent: identification_number
+    entities:
+    - number: '123654789'
+    - number: 123654789
+  - slot_was_set:
+    - slot_provider_number: 123654789
+  - slot_was_set:
+    - requested_slot: slot_provider_name
+  - intent: user_name
+    entities:
+    - PERSON: john
+    - PERSON: john
+  - slot_was_set:
+    - slot_provider_name: john
+  - slot_was_set:
+    - requested_slot: slot_provider_ssn
+  - intent: identification_number
+    entities:
+    - number: '6374'
+    - number: '6374'
+  - slot_was_set:
+    - slot_provider_ssn: '6374'
+  - slot_was_set:
+    - requested_slot: slot_provider_county
+  - intent: provider_county
+    entities:
+    - county: Yolo
+  - slot_was_set:
+    - slot_provider_county: Yolo
+  - active_loop: null
+  - action: action_agent_transfer
+  - action: utter_twilio_end_call

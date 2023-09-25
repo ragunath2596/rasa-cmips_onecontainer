@@ -1,0 +1,220 @@
+version: "3.1"
+nlu:
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - hello there
+    - good morning
+    - good evening
+    - moin
+    - hey there
+    - let's go
+    - hey dude
+    - goodmorning
+    - goodevening
+    - good afternoon
+- intent: affirm
+  examples: |
+    - yes
+    - y
+    - indeed
+    - of course
+    - that sounds good
+    - correct
+- intent: deny
+  examples: |
+    - no
+    - n
+    - never
+    - I don't think so
+    - don't like that
+    - no way
+    - not really
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - are you a human?
+    - am I talking to a bot?
+    - am I talking to a human?
+- intent: call_termination
+  examples: |
+    - call_terminated
+    - terminate the call
+    - call termination
+    - callterminated
+- intent: user_type
+  examples: |
+    - i am a [provider](entity_user_type)
+    - [provider](entity_user_type)
+    - i am a [recevier](entity_user_type)
+    - [recevier](entity_user_type)
+    - Hi, I am a [provider](entity_user_type)
+    - Hello, I am a [provider](entity_user_type)
+    - Good Morning, I am a [provider](entity_user_type)
+    - Good evening, I am a [provider](entity_user_type)
+    - Good Day, I am  a [provider](entity_user_type)
+    - I am [provider](entity_user_type)
+    - [provider](entity_user_type)
+- intent: identification_number
+  examples: |
+    - my identification number is  900765948](number)
+    - my number is [868545162](number)
+    - identification number is [686203836](number)
+    - [789456123](number)
+    - [000618897](number)
+    - [900765948](number)
+    - [8 6 8 5 4 5 1 6 2](number)
+    - [6 8 6 2 0 38 36](number)
+    - [3 5 4 3 7 6 0 0 8](number)
+    - [566510034](number)
+    - [725058436](number)
+    - [2 9 0 2 5 6 2 9 7](number)
+    - [1 9 2 0 9 7  3 4 0](number)
+    - [6 7 0 3 0 9 8 9 3](number)
+    - [435663436](number)
+    - [422637814](number)
+    - [4 4 9 9 2 0 3 3 2](number)
+    - [635269546](number)
+    - [111944279](number)
+    - [856475254](number)
+    - [663552111](number)
+    - [412 283 076](number)
+    - [246 284 335](number)
+    - [770 3499 59](number)
+    - [670 233 593](number)
+    - [80 79 49 42 7](number)
+    - [908 328 825](number)
+    - [743 1 44533](number)
+    - [361 669 032](number)
+    - [862 987 243](number)
+    - [31 54 20 20 3](number)
+    - [237 504 492](number)
+    - [879 687 384](number)
+    - [193 049 510](number)
+    - [590 447 482](number)
+    - [630 998 562](number)
+    - [635-269-546](number)
+    - [111-944-279](number)
+    - [856-475-254](number)
+    - [663-552-111](number)
+    - [63-52-69-54-6](number)
+    - [1-1-1-9-4-4-2-7-9](number)
+    - my last four digits are [6374](number)
+    - my number is [63 74](number)
+    - [63 52](number)
+    - [6 3 2 4](number)
+    - [52 4 1](number)
+    - [3 6 2 1](number)
+    - [7 4 52](number)
+    - [1 55 2](number)
+    - [8 4 5 2](number)
+    - [22 55](number)
+    - [12 74](number)
+    - [63 74](number)
+    - [6 3 7 4](number)
+    - [63 7 4](number)
+    - [521452365](number)
+    - [1234](number)
+    - [225336336](number)
+    - [635241789](number)
+    - [1234](number)
+- intent: user_name
+  examples: |
+    - my name is [James Smith](PERSON)
+    - it is [Michael Smith](PERSON)
+    - [Robert Smith](PERSON)
+    - [John Smith](PERSON)
+    - [David Johnson](PERSON)
+    - [Michael Brown](PERSON)
+    - [Maria Garcia](PERSON)
+    - [Michael Williams](PERSON)
+    - [James Smith](PERSON)
+    - [Anne Marrie](PERSON)
+    - [Willima smith](PERSON)
+    - [Michael Smith](PERSON)
+    - [Charles](PERSON)
+    - [George](PERSON)
+    - [Frank](PERSON)
+    - [Joseph](PERSON)
+    - [Thomas](PERSON)
+    - [Henry](PERSON)
+    - [Robert](PERSON)
+    - [Edward](PERSON)
+    - [Harry](PERSON)
+    - [Walter](PERSON)
+    - [Arthur](PERSON)
+    - [Fred](PERSON)
+    - [Albert](PERSON)
+    - [Samuel](PERSON)
+    - [David](PERSON)
+    - [Louis](PERSON)
+    - [Joe](PERSON)
+    - [Charlie](PERSON)
+    - [Clarence](PERSON)
+    - [Richard](PERSON)
+    - [john](PERSON)
+    - [john](PERSON)
+- intent: provider_county
+  examples: |
+    - The county is [Alameda](county)
+    - I work for [Alpine](county) county
+    - It is [Amador](county) county
+    - It is [Butte](county) county
+    - The county I work for is [Calaveras](county)
+    - The county I work for [Colusa](county)
+    - The county is [Contra Costa](county)
+    - The county I work for is [Del Norte](county)
+    - The county I work for is [El Dorado](county)
+    - [Fresno](county) county
+    - The county is [Glenn](county)
+    - [Humboldt](county) county
+    - [Imperial](county) county
+    - The county is [Inyo](county)
+    - The county is [Kern](county)
+    - The county is [Kings](county)
+    - The county I work for is [Lake](county)
+    - [Lassen](county) county
+    - [Los Angeles](county)
+    - It is [Madera](county) county
+    - The county is [Marin](county)
+    - [Mariposa](county) county
+    - The county I work for is [Mendocino](county)
+    - [Merced](county) county
+    - [Modoc](county)
+    - The county I work for is [Mono](county)
+    - It is [Monterey](county) county
+    - [Napa](county)
+    - The county is [Nevada](county)
+    - [Orange](county)
+    - [Placer](county) county
+    - [Plumas](county)
+    - The county is [Riverside](county)
+    - The county is [Sacramento](county)
+    - [San Benito](county) county
+    - [San Bernardino](county)
+    - It is [San Francisco](county)
+    - The county I work for is [San Joaquin](county)
+    - It is [San Luis Obispo](county)
+    - [San Mateo](county) county
+    - The county is [Santa Barbara](county)
+    - [Santa Clara](county)
+    - [Santa Cruz](county)
+    - The county is [Shasta](county)
+    - The county is [Sierra](county)
+    - [Siskiyou](county) county
+    - [Solano](county)
+    - The county I work for is [Sonoma](county)
+    - It is [Stanislaus](county) county
+    - [Sutter](county)
+    - The county is [Tehama](county)
+    - The county I work for is [Trinity](county)
+    - [Tulare](county)
+    - It is [Tuolumne](county)
+    - [Ventura](county)
+    - [Yolo](county)
+    - The county is [Yuba](county)
+    - [Yolo](county) county
+    - Napa
+    - [napa](county)
