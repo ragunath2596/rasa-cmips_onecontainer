@@ -122,6 +122,17 @@ responses:
   - text: Sorry. last four digits {slot_provider_ssn} doesn't match with our system
   utter_fallback:
   - text: Sorry, i didn't understand that. Can you please repeat again?
+  utter_county_fallback: 
+  - text: "Sorry, I didn't understand that. Can you please repeat the county name again?"
+  utter_username_fallback: 
+  - text: "Sorry, I didn't understand that. Can you please repeat the username again?"
+  utter_usertype_fallback: 
+  - text: "Sorry, I didn't understand that. Can you please repeat the usertype again?"
+  utter_ssn_fallback: 
+  - text: "Sorry, I didn't understand that. Can you please repeat the SSN again?"
+  utter_provider_number_fallback:
+  - text: "Sorry, I didn't understand that. Can you please repeat the provider number again?"
+
   utter_default:
   - text: Sorry. I cannot proceed further. Can you please call us back?
   utter_twilio_end_call:

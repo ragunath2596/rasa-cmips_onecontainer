@@ -4,6 +4,7 @@ from typing import Text, List, Any, Dict
 from rasa_sdk import Tracker, Action
 from rasa_sdk.events import UserUtteranceReverted
 from rasa_sdk.executor import CollectingDispatcher
+from rasa_sdk.types import DomainDict
 
 # Configure logging with a custom log formatter
 
@@ -68,7 +69,23 @@ class ActionDefaultFallback(Action):
         info_logger.info(f"IVR input FB: {user_input}")
 
         # Respond with a fallback message
-        dispatcher.utter_message(response="utter_fallback")
+        message = self.get_utter_message(tracker)
+        dispatcher.utter_message(response=message)
 
         # Revert the last user utterance to return to the previous state
         return [UserUtteranceReverted()]
+
+
+    def get_utter_message(self , tracker):
+        requested_slot = tracker.get_slot("requested_slot")
+        utter_dict = {
+            "slot_provider_number": utter_provider_name_fallback,
+            "slot_provider_ssn":utter_ssn_fallback,
+            "slot_user_type":utter_usertype_fallback,
+            "slot_provider_name":utter_username_fallback,
+            "slot_provider_county":utter_county_fallback,
+        }
+        if requested_slot in utter_dict:
+            return utter_dict[requested_slot]
+        else:
+            return utter_fallback

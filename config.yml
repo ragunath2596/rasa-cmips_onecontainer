@@ -30,8 +30,8 @@ pipeline:
     epochs: 100
     constrain_similarities: true
   - name: FallbackClassifier
-    threshold: 0.7
-    ambiguity_threshold: 0.7
+    threshold: 0.3
+    ambiguity_threshold: 0.2
   - name: DucklingEntityExtractor
     url: http://20.246.188.78:8000
     dimensions:
@@ -54,13 +54,13 @@ policies:
   # - name: MemoizationPolicy
 
   - name: RulePolicy
-    core_fallback_threshold: 1.0
-    core_fallback_action_name: "action_default_fallback"
-    enable_fallback_prediction: false
+    nlu_fallback_threshold: 0.3  # Set the NLU threshold for fallback
+    core_fallback_threshold: 0.2  # Set the core threshold for fallback
+    fallback_action_name : "action_default_fallback"
     
   - name: UnexpecTEDIntentPolicy
     max_history: 5
-    epochs: 100
+    epochs: 70
   - name: TEDPolicy
     max_history: 2
     epochs: 100
