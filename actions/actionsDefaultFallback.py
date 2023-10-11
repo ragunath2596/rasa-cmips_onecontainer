@@ -79,13 +79,13 @@ class ActionDefaultFallback(Action):
     def get_utter_message(self , tracker):
         requested_slot = tracker.get_slot("requested_slot")
         utter_dict = {
-            "slot_provider_number": utter_provider_name_fallback,
-            "slot_provider_ssn":utter_ssn_fallback,
-            "slot_user_type":utter_usertype_fallback,
-            "slot_provider_name":utter_username_fallback,
-            "slot_provider_county":utter_county_fallback,
+            "slot_provider_number": "utter_provider_number_fallback",
+            "slot_provider_ssn":"utter_ssn_fallback",
+            "slot_user_type":"utter_usertype_fallback",
+            "slot_provider_name":"utter_username_fallback",
+            "slot_provider_county":"utter_county_fallback",
         }
         if requested_slot in utter_dict:
             return utter_dict[requested_slot]
         else:
-            return utter_fallback
+            return "utter_fallback"
