@@ -128,9 +128,6 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 }
             else:
                 logging.debug(f"Provider number verification failed")
-                dispatcher.utter_message(
-                    response="utter_invalid_provider_number"
-                )
                 save_database_mongo(tracker, "provider_number", "N")
                 return {
                     "slot_provider_number": None,
@@ -179,9 +176,6 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 }
             else:
                 logging.debug(f"provider_name verification failed")
-                dispatcher.utter_message(
-                    response="utter_invalid_full_name"
-                )
                 save_database_mongo(tracker, "provider_name", "N")
                 return {
                     "slot_provider_name": None,
@@ -239,9 +233,6 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 else:
                     logging.debug(f"provider_ssn verification failed")
                     num_string = [" ".join(num) for num in str(number_)]
-                    dispatcher.utter_message(
-                    response="utter_invalid_SSN"
-                    )
                     return {
                         "slot_provider_ssn": None,
                         "slot_provider_number_failure_count": slot_provider_number_failure_count + 1,
@@ -289,7 +280,6 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 }
             else:
                 logging.debug(f"provider_county verification failed")
-                dispatcher.utter_message(response="utter_invalid_county")
                 save_database_mongo(tracker, "provider_county", "N")
                 return {
                     "slot_provider_county": None,
