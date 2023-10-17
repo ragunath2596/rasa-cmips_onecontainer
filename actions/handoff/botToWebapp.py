@@ -33,27 +33,25 @@ info_logger.addHandler(info_handler)
 error_logger.addHandler(error_handler)
 
 
-
-
 class ActionBotToWebUITransfer(Action):
     def name(self) -> str:
-        return 'action_bot_to_webui_transfer'
+        return "action_bot_to_webui_transfer"
 
     def run(
         self,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
-        domain: Dict[Text, Any]
+        domain: Dict[Text, Any],
     ) -> List[EventType]:
         conversation_id = tracker.sender_id
         # Replace 'web_ui_url' with the actual URL or endpoint for the web UI
-        web_ui_url = 'https://example.com/web_ui_transfer'
+        web_ui_url = "https://example.com/web_ui_transfer"
 
         # You can include any relevant information in the payload
         payload = {
-            'message': 'Transfer to Web UI requested',
-            'user_id': tracker.sender_id,
-            'conversation_id': conversation_id,  # Replace with a unique conversation identifier
+            "message": "Transfer to Web UI requested",
+            "user_id": tracker.sender_id,
+            "conversation_id": conversation_id,  # Replace with a unique conversation identifier
         }
 
         # You should implement the logic to send the payload to the web UI here
@@ -65,8 +63,6 @@ class ActionBotToWebUITransfer(Action):
         user_info = self.get_user_info(tracker)
 
         debug_logger.debug(f"user_info : {user_info}")
-
-        dispatcher.utter_message("Transferring to Web UI.")
 
         InMemoryLockStore().delete_lock(conversation_id)
 
