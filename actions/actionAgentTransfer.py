@@ -43,129 +43,116 @@ debug_logger.addHandler(debug_handler)
 info_logger.addHandler(info_handler)
 error_logger.addHandler(error_handler)
 
-
 class ActionAgentTransfer(Action):
-    
     """
-    This action is executed when verification is successful.
-    It performs the following steps:
-    1. Logs verification success.
-    2. Responds with a verification success message.
-    3. Deletes the lock for the conversation.
-    4. Logs the deletion of the lock.
-    5. Sends an end call message.
-    6. Restarts the conversation.
+    Action for handling the transfer of a conversation to a live agent based on verification success or failure.
+
+    This action performs the following steps:
+    1. Logs verification success or failure.
+    2. Saves conversation data to MongoDB.
+    3. Initiates a handoff based on the input channel.
+    4. Responds with a verification success or failure message.
+    5. Deletes the lock for the conversation.
+    6. Sends an end call message.
+    7. Restarts the conversation.
     """
 
     def name(self) -> Text:
+        """
+        Returns the name of the action.
+        """
         return "action_agent_transfer"
 
-    def run(
-        self,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> List[Dict[Text, Any]]:
+    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict) -> List[Dict[Text, Any]]:
+        """
+        Executes the action.
+
+        Args:
+            dispatcher (CollectingDispatcher): Dispatcher to send messages.
+            tracker (Tracker): Conversation tracker.
+            domain (DomainDict): Domain configuration.
+
+        Returns:
+            List[Dict[Text, Any]]: List of events to be processed.
+        """
         slot_failure_flag = tracker.get_slot("slot_failure_flag")
         conversation_id = tracker.sender_id
-        inpu_channel = tracker.get_latest_input_channel()
-        if  slot_failure_flag:
-            # Log verification failed
-            debug_logger.debug("Verification failed")
+        input_channel = tracker.get_latest_input_channel()
 
-            info_logger.info(f"Action Verification Failed Tranfering call to live agent: {conversation_id}")
+        # Log verification success or failure
+        log_verification(slot_failure_flag, conversation_id, tracker)
 
-            # Get conversation text data
-            conversation_text = "\n".join(
-                [event["text"] for event in tracker.events if "text" in event]
-            )
-            # Calculate time taken
-            time_taken = tracker.events[-1].get("timestamp") - tracker.events[0].get(
-                "timestamp"
-            )
+        # Get conversation text data
+        conversation_text = "\n".join([event["text"] for event in tracker.events if "text" in event])
 
-            data = {
-                "conversation_index": conversation_id,
-                "conversation_text_data": conversation_text,
-                "caller_verification_successful": "N",
-                "time_taken": time_taken,
-                "failure_field": "ssn",
-            }
-            Mongo_obj = MongoDataManager()
-            Mongo_obj.save_data(data)
-            conversation_id = tracker.sender_id
+        # Calculate time taken
+        time_taken = tracker.events[-1]["timestamp"] - tracker.events[0]["timestamp"]
 
-            self.get_handoff(inpu_channel, dispatcher, tracker, domain)
+        # Save data to MongoDB
+        save_data_to_mongo(conversation_id, conversation_text, slot_failure_flag, time_taken)
 
-            # Respond with a verification end message
-            dispatcher.utter_message(response="utter_verification_failed")
-            
-            # Delete the lock for the conversation
-            InMemoryLockStore().delete_lock(conversation_id)
+        # Perform handoff based on input channel
+        self.get_handoff(input_channel, dispatcher, tracker, domain)
 
-            # Log the deletion of the lock
-            debug_logger.debug(f"Deleted lock for conversation_id: {conversation_id}")
+        # Respond with verification message
+        response_message = "utter_verification_failed" if slot_failure_flag else "utter_verification_success"
+        dispatcher.utter_message(response=response_message)
 
-            # Send an end call message
-            dispatcher.utter_message(response="utter_twilio_end_call")
+        # Delete the lock for the conversation
+        InMemoryLockStore().delete_lock(conversation_id)
+        debug_logger.debug(f"Deleted lock for conversation_id: {conversation_id}")
 
-            # Restart the conversation
-            return [Restarted()]
-            
-        else:
-            # Log verification success
-            debug_logger.debug("Verification success")
+        # Restart the conversation
+        return [Restarted()]
 
-            # Get conversation text data
-            conversation_text = "\n".join(
-                [event["text"] for event in tracker.events if "text" in event]
-            )
-            # Calculate time taken
-            time_taken = tracker.events[-1].get("timestamp") - tracker.events[0].get(
-                "timestamp"
-            )
+    def get_handoff(self, input_channel, dispatcher, tracker, domain):
+        """
+        Initiates the handoff based on the input channel.
 
-            data = {
-                "conversation_index": conversation_id,
-                "conversation_text_data": conversation_text,
-                "caller_verification_successful": "Y",
-                "time_taken": time_taken,
-                "failure_field": None,
-            }
-            Mongo_obj = MongoDataManager()
-            Mongo_obj.save_data(data)
-            conversation_id = tracker.sender_id
+        Args:
+            input_channel (str): Input channel for the conversation.
+            dispatcher (CollectingDispatcher): Dispatcher to send messages.
+            tracker (Tracker): Conversation tracker.
+            domain (DomainDict): Domain configuration.
+        """
+        handoff_obj = (
+            twillio_handoff() if input_channel == "twilio_voice"
+            else voximplant_handoff() if input_channel == "Voximplant_voice"
+            else ActionBotToWebUITransfer()
+        )
+        handoff_obj.run(dispatcher, tracker, domain)
+        return True
 
+def log_verification(slot_failure_flag, conversation_id, tracker):
+    """
+    Logs the verification success or failure.
 
-            #Log the info that conversation successful
-            info_logger.info(f"Action Verification succesfull Tranfering call to live agent: {conversation_id}")
+    Args:
+        slot_failure_flag (bool): Flag indicating verification failure.
+        conversation_id (str): ID of the conversation.
+        tracker (Tracker): Conversation tracker.
+    """
+    debug_logger.debug("Verification failed" if slot_failure_flag else "Verification success")
+    info_logger.info(f"Action Verification {'failed' if slot_failure_flag else 'successful'} "
+                     f"Transferring call to live agent: {conversation_id}")
+    return True
 
-            self.get_handoff(inpu_channel, dispatcher, tracker, domain)
+def save_data_to_mongo(conversation_id, conversation_text, slot_failure_flag, time_taken):
+    """
+    Saves conversation data to MongoDB.
 
-            # Respond with a verification success message
-            dispatcher.utter_message(response="utter_verification_success")
-
-            # Delete the lock for the conversation
-            InMemoryLockStore().delete_lock(conversation_id)
-
-            # Log the deletion of the lock
-            debug_logger.debug(f"Deleted lock for conversation_id: {conversation_id}")
-
-            # Send an end call message
-            dispatcher.utter_message(response="utter_twilio_end_call")
-
-            # Restart the conversation
-            return [Restarted()]
-
-
-    def get_handoff(self, inpu_channel, dispatcher, tracker, domain):
-        if inpu_channel == "twilio_voice":
-                handoff_obj = twillio_handoff()
-                handoff_obj.run(dispatcher, tracker, domain)
-        elif inpu_channel == "Voximplant_voice":
-            handoff_obj = voximplant_handoff()
-            handoff_obj.run(dispatcher, tracker, domain)
-        else:
-            handoff_obj = ActionBotToWebUITransfer()
-            handoff_obj.run(dispatcher, tracker, domain)
-        return None
+    Args:
+        conversation_id (str): ID of the conversation.
+        conversation_text (str): Text data of the conversation.
+        slot_failure_flag (bool): Flag indicating verification failure.
+        time_taken (float): Time taken for the conversation.
+    """
+    data = {
+        "conversation_index": conversation_id,
+        "conversation_text_data": conversation_text,
+        "caller_verification_successful": "N" if slot_failure_flag else "Y",
+        "time_taken": time_taken,
+        "failure_field": "ssn" if slot_failure_flag else None,
+    }
+    MongoDataManager().save_data(data)
+    return True

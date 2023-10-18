@@ -3,8 +3,8 @@ from typing import List, Dict, Any, Text
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import EventType
-
-
+from rasa.core.lock_store import InMemoryLockStore
+from rasa_sdk.events import Restarted
 
 log_format = (
     "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d:%(funcName)s - %(message)s"
@@ -45,15 +45,26 @@ class ActionHandoff(Action):
     ) -> List[EventType]:
         user_info = self.get_user_info(tracker)
         dispatcher.utter_message(template="utter_handoff")
-        debug_logger.debug(f"transfer call to twillio")
+        debug_logger.debug(f"transfer call to VOXIMPLANT")
         debug_logger.debug(f"user_info : {user_info}")
 
+        conversation_id = tracker.sender_id
 
-        return []
+        InMemoryLockStore().delete_lock(conversation_id)
+
+        # Log the deletion of the lock
+        debug_logger.debug(f"Deleted lock for conversation_id: {conversation_id}")
+
+        # Send an end call message
+        dispatcher.utter_message(response="utter_twilio_end_call")
+
+        # Restart the conversation
+        return [Restarted()]
+
 
     def get_user_info(self, tracker: Tracker) -> Dict[str, Any]:
         return {
-            "user_type": tracker.get_slot("user_type"),
+            "user_type": tracker.get_slot("slot_user_type"),
             "provider_number": tracker.get_slot("slot_provider_number"),
             "name": tracker.get_slot("slot_provider_name"),
             "ssn": tracker.get_slot("slot_provider_ssn"),

@@ -1,12 +1,13 @@
 import logging
 from typing import Text, List, Any, Dict
 
-from rasa_sdk import Tracker, Action
-from rasa_sdk.events import Restarted
+from rasa_sdk import Tracker, FormValidationAction, Action
+from rasa_sdk.events import UserUtteranceReverted, ActionExecuted, Restarted
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
 
-
+from nltk.stem import WordNetLemmatizer
+from fuzzywuzzy import fuzz, process
 from difflib import SequenceMatcher
 from rasa.core.lock_store import InMemoryLockStore
 
