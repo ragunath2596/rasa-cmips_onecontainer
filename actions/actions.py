@@ -75,7 +75,7 @@ def save_database_mongo(tracker, field_name, caller_verification):
 
 
 class ValidateCallerVerificationForm(FormValidationAction):
-    check = 1
+
     def name(self) -> Text:
         return "validate_caller_validation_form"
     
@@ -105,11 +105,10 @@ class ValidateCallerVerificationForm(FormValidationAction):
         logging.debug(f"Pre-processed number: {number_}")
 
         # Fetch records using the function
-        # self.matching_records = fetch_records_by_provider_number(str(slot_value)) or 1
+        self.matching_records = fetch_records_by_provider_number(str(slot_value))
 
         # Compare fetched records with user input
-        # if self.matching_records or 1:
-        if self.check == 1:
+        if self.matching_records:
             return {
                 "slot_provider_number": slot_value,
                 "slot_provider_number_failure_count": 0,
@@ -153,14 +152,11 @@ class ValidateCallerVerificationForm(FormValidationAction):
         logging.debug(f"IVR input PNAME: {(tracker.latest_message)['text']}")
 
         # Retrieve matching records from the stored attribute
-        # matching_records = self.matching_records or 1
+        matching_records = self.matching_records
 
         # Compare fetched records with user input
         try:
-            # if (
-            #     matching_records and matching_records[0]["full_name"] == str(slot_value)
-            # ) or 
-            if self.check == 1:
+            if matching_records and matching_records[0]["full_name"] == str(slot_value):
                 # Proceed with validation
                 return {
                     "slot_provider_name": slot_value,
@@ -210,16 +206,11 @@ class ValidateCallerVerificationForm(FormValidationAction):
         logging.debug(f"Pre-processed number: {number_}")
 
         # Retrieve matching records from the stored attribute
-        # matching_records = self.matching_records or 1
+        matching_records = self.matching_records
 
         # Compare fetched records with user input
         try:
-            if (
-                # matching_records and matching_records[0]["ssn"] == str(slot_value)
-                "6374"
-                == str(slot_value)
-            ):
-
+            if  matching_records and matching_records[0]["ssn"] == str(slot_value):
                 # Proceed with validation
                 return {
                     "slot_provider_ssn": slot_value,
@@ -238,7 +229,6 @@ class ValidateCallerVerificationForm(FormValidationAction):
                     }
                 else:
                     logging.debug(f"provider_ssn verification failed")
-                    num_string = [" ".join(num) for num in str(number_)]
                     dispatcher.utter_message(
                     response="utter_invalid_SSN"
                     )
@@ -265,14 +255,11 @@ class ValidateCallerVerificationForm(FormValidationAction):
         logging.debug(f"IVR input county: {(tracker.latest_message)['text']}")
 
         # Retrieve matching records from the stored attribute
-        # matching_records = self.matching_records or 1
+        matching_records = self.matching_records
 
         # Compare fetched records with user input
         try:
-            # if (
-            #     matching_records and matching_records[0]["county"] == str(slot_value)
-            #  ) or 1:
-            if self.check == 1:
+            if  matching_records and matching_records[0]["county"] == str(slot_value):
                 # Proceed with validation
                 return {
                     "slot_provider_county": slot_value,
