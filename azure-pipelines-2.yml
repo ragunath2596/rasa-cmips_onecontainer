@@ -1,0 +1,40 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    exclude:
+    - '*'
+
+pr:
+  branches:
+    exclude:
+    - '*'
+
+pr:
+  - '*'
+
+resources:
+  repositories:
+    - repository: Repo1
+      type: github
+      name: <GitHubOrgOrUser>/<Repo1>
+      ref: refs/heads/main
+
+    - repository: Repo2
+      type: github
+      name: <GitHubOrgOrUser>/<Repo2>
+      ref: refs/heads/main
+
+    - repository: Repo3
+      type: github
+      name: <GitHubOrgOrUser>/<Repo3>
+      ref: refs/heads/main
+
+jobs:
+- job: Build
+  steps:
+  - script: echo Build and Test all Repos
+    displayName: 'Build and Test'
