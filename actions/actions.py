@@ -6,9 +6,8 @@ from typing import Text, List, Any, Dict
 from nltk.stem import WordNetLemmatizer
 from rasa_sdk import Tracker, FormValidationAction, Action
 from rasa_sdk.types import DomainDict
-from rasa_sdk.events import Restarted , SlotSet
+from rasa_sdk.events import Restarted, SlotSet
 from rasa_sdk.events import FollowupAction
-
 
 
 from rasa_sdk import Tracker, FormValidationAction
@@ -76,9 +75,10 @@ def save_database_mongo(tracker, field_name, caller_verification):
 
 class ValidateCallerVerificationForm(FormValidationAction):
     check = 1
+
     def name(self) -> Text:
         return "validate_caller_validation_form"
-    
+
     async def validate_slot_user_type(
         self,
         slot_value: Any,
@@ -86,8 +86,8 @@ class ValidateCallerVerificationForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        if (tracker.latest_message)['text'] == "call_terminated":
-            return { "requested_slot": None}
+        if (tracker.latest_message)["text"] == "call_terminated":
+            return {"requested_slot": None}
         return {"slot_user_type": slot_value}
 
     async def validate_slot_provider_number(
@@ -97,7 +97,9 @@ class ValidateCallerVerificationForm(FormValidationAction):
         tracker: Tracker,
         domain: DomainDict,
     ) -> Dict[Text, Any]:
-        slot_provider_number_failure_count = tracker.get_slot("slot_provider_number_failure_count") or 0
+        slot_provider_number_failure_count = (
+            tracker.get_slot("slot_provider_number_failure_count") or 0
+        )
 
         number_ = re.sub(r"\D", "", str(tracker.latest_message["text"]))
         logging.debug(f"IVR input PNUM: {tracker.latest_message['text']}")
@@ -118,9 +120,7 @@ class ValidateCallerVerificationForm(FormValidationAction):
             if slot_provider_number_failure_count >= 2:
                 logging.debug(f"Provider number verification failed")
 
-                dispatcher.utter_message(
-                    response="utter_invalid_provider_number"
-                )
+                dispatcher.utter_message(response="utter_invalid_provider_number")
                 return {
                     "slot_provider_number": None,
                     "slot_provider_number_failure_count": 0,
@@ -128,13 +128,11 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 }
             else:
                 logging.debug(f"Provider number verification failed")
-                dispatcher.utter_message(
-                    response="utter_invalid_provider_number"
-                )
                 save_database_mongo(tracker, "provider_number", "N")
                 return {
                     "slot_provider_number": None,
-                    "slot_provider_number_failure_count": slot_provider_number_failure_count + 1,
+                    "slot_provider_number_failure_count": slot_provider_number_failure_count
+                    + 1,
                 }
 
     async def validate_slot_provider_name(
@@ -146,7 +144,9 @@ class ValidateCallerVerificationForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         """Validate `slot_provider_name` value."""
 
-        slot_provider_number_failure_count = tracker.get_slot("slot_provider_number_failure_count") or 0
+        slot_provider_number_failure_count = (
+            tracker.get_slot("slot_provider_number_failure_count") or 0
+        )
 
         name_ = re.sub(r"\D", "", str(tracker.latest_message["text"]))
         logging.debug("Inside validate_provider_name")
@@ -159,7 +159,7 @@ class ValidateCallerVerificationForm(FormValidationAction):
         try:
             # if (
             #     matching_records and matching_records[0]["full_name"] == str(slot_value)
-            # ) or 
+            # ) or
             if self.check == 1:
                 # Proceed with validation
                 return {
@@ -169,9 +169,7 @@ class ValidateCallerVerificationForm(FormValidationAction):
             if slot_provider_number_failure_count >= 2:
                 logging.debug(f"provider_name verification failed")
 
-                dispatcher.utter_message(
-                    response="utter_invalid_full_name"
-                )
+                dispatcher.utter_message(response="utter_invalid_full_name")
                 return {
                     "slot_provider_name": None,
                     "slot_provider_number_failure_count": 0,
@@ -179,13 +177,11 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 }
             else:
                 logging.debug(f"provider_name verification failed")
-                dispatcher.utter_message(
-                    response="utter_invalid_full_name"
-                )
                 save_database_mongo(tracker, "provider_name", "N")
                 return {
                     "slot_provider_name": None,
-                    "slot_provider_number_failure_count": slot_provider_number_failure_count + 1,
+                    "slot_provider_number_failure_count": slot_provider_number_failure_count
+                    + 1,
                 }
         except Exception as e:
             logging.debug(
@@ -201,7 +197,9 @@ class ValidateCallerVerificationForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         """Validate `slot_provider_ssn` value."""
 
-        slot_provider_number_failure_count = tracker.get_slot("slot_provider_number_failure_count") or 0
+        slot_provider_number_failure_count = (
+            tracker.get_slot("slot_provider_number_failure_count") or 0
+        )
 
         logging.debug("Inside validate_provider_ssn")
         logging.debug(f"IVR input SSN: {(tracker.latest_message)['text']}")
@@ -219,13 +217,12 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 "6374"
                 == str(slot_value)
             ):
-
                 # Proceed with validation
                 return {
                     "slot_provider_ssn": slot_value,
                     "slot_provider_number_failure_count": slot_provider_number_failure_count,
                 }
-            
+
             else:
                 if slot_provider_number_failure_count >= 2:
                     logging.debug(f"provider_ssn verification failed max tries")
@@ -234,17 +231,15 @@ class ValidateCallerVerificationForm(FormValidationAction):
                     return {
                         "slot_provider_number_failure_count": 0,
                         "slot_failure_flag": True,
-                        "requested_slot":None
+                        "requested_slot": None,
                     }
                 else:
                     logging.debug(f"provider_ssn verification failed")
                     num_string = [" ".join(num) for num in str(number_)]
-                    dispatcher.utter_message(
-                    response="utter_invalid_SSN"
-                    )
                     return {
                         "slot_provider_ssn": None,
-                        "slot_provider_number_failure_count": slot_provider_number_failure_count + 1,
+                        "slot_provider_number_failure_count": slot_provider_number_failure_count
+                        + 1,
                     }
         except Exception as e:
             error_logger.error(
@@ -259,7 +254,9 @@ class ValidateCallerVerificationForm(FormValidationAction):
         domain: DomainDict,
     ) -> Dict[Text, Any]:
         """Validate `slot_provider_county` value."""
-        slot_provider_number_failure_count = tracker.get_slot("slot_provider_number_failure_count") or 0
+        slot_provider_number_failure_count = (
+            tracker.get_slot("slot_provider_number_failure_count") or 0
+        )
 
         logging.debug("Inside validate_provider_county")
         logging.debug(f"IVR input county: {(tracker.latest_message)['text']}")
@@ -289,11 +286,11 @@ class ValidateCallerVerificationForm(FormValidationAction):
                 }
             else:
                 logging.debug(f"provider_county verification failed")
-                dispatcher.utter_message(response="utter_invalid_county")
                 save_database_mongo(tracker, "provider_county", "N")
                 return {
                     "slot_provider_county": None,
-                    "slot_provider_number_failure_count": slot_provider_number_failure_count + 1,
+                    "slot_provider_number_failure_count": slot_provider_number_failure_count
+                    + 1,
                 }
         except Exception as e:
             logging.debug(
