@@ -1,7 +1,34 @@
-apiVersion : apps/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rasacustomformsnlu 
+  name: rasacustomformsactions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rasacustomformsactions
+  template:
+    metadata:
+      labels:
+        app: rasacustomformsactions
+    spec:
+      containers:
+        - name: rasacustomformsactions
+          image: x2container.azurecr.io/rasacustomformsactions
+          ports:
+            - containerPort: 5055
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1000Mi
+            limits:
+              cpu: 2000m
+              memory: 1500Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rasacustomformsnlu
 spec:
   replicas: 1
   selector:
@@ -10,13 +37,13 @@ spec:
   template:
     metadata:
       labels:
-        app: rasacustomformsnlu 
+        app: rasacustomformsnlu
     spec:
       containers:
-        - name: rasacustomformsnlu 
+        - name: rasacustomformsnlu
           image: x2container.azurecr.io/rasacustomformsnlu
           ports:
-          - containerPort: 5005
+            - containerPort: 5005
           resources:
             requests:
               cpu: 200m
