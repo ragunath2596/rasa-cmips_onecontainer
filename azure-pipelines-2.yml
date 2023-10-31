@@ -1,121 +1,90 @@
-# Merged Azure DevOps Pipeline
-
 trigger:
 - rasa-cmips_onecontainer
 
-resources:
-- repo: self
-
-variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '3271d7e6-2828-444a-b496-b55c8a795d9e'
-  imageRepository: 'rasacustomformsactions'
-  containerRegistry: 'x2container.azurecr.io'
-  dockerfilePath: '**/Dockerfile.test'
-  tag: '$(Build.BuildId)'
-  imagePullSecret: 'x2container78551212-auth'
-  # Agent VM image name
-  vmImageName: 'ubuntu-latest'
+pr: none # This disables Pull Request (PR) triggers, you can adjust it if needed
 
 stages:
-- stage: Build
-  displayName: Build stage
+- stage: BuildActions
+  displayName: Build stage for rasacustomformsactions
   jobs:
-  - job: Build
+  - job: BuildActions
     displayName: Build
     pool:
-      vmImage: $(vmImageName)
+      vmImage: 'ubuntu-latest'
     steps:
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
         command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: 'rasacustomformsactions'
+        dockerfile: '**/Dockerfile.test'
+        containerRegistry: 'dee01d6c-2a10-48ac-b011-4c5630267cdc' # Use the appropriate connection
         tags: |
-          $(tag)
-    - upload: manifests
-      artifact: manifests
-
-- stage: Deploy
-  displayName: Deploy stage
-  dependsOn: Build
-  jobs:
-  - deployment: Deploy
-    displayName: Deploy
-    pool:
-      vmImage: $(vmImageName)
-    environment: 'karthikx2rasacustomforms-1333.default'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: KubernetesManifest@0
-            displayName: Create imagePullSecret
-            inputs:
-              action: createSecret
-              secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
-          - task: KubernetesManifest@0
-            displayName: Deploy to Kubernetes cluster
-            inputs:
-              action: deploy
-              manifests: |
-                $(Pipeline.Workspace)/manifests/deployment-actions.yml
-                $(Pipeline.Workspace)/manifests/service-actions.yml
-              imagePullSecrets: |
-                $(imagePullSecret)
-              containers: |
-                $(containerRegistry)/$(imageRepository):$(tag)
+          $(Build.BuildId)
 
 - stage: BuildNLU
-  displayName: Build NLU stage
+  displayName: Build stage for rasacustomformsnlu
   jobs:
   - job: BuildNLU
-    displayName: Build NLU
+    displayName: Build
     pool:
-      vmImage: $(vmImageName)
+      vmImage: 'ubuntu-latest'
     steps:
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
         command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: 'rasacustomformsnlu'
+        dockerfile: '**/Dockerfile.test'
+        containerRegistry: 'b843bbb8-9286-45c2-90ec-3503cbc4f78e' # Use the appropriate connection
         tags: |
-          $(tag)
-    - upload: manifests
-      artifact: manifests
+          $(Build.BuildId)
 
-- stage: DeployNLU
-  displayName: Deploy NLU stage
-  dependsOn: BuildNLU
+- stage: DeployToAKS
+  displayName: Deploy to Azure Kubernetes Service
+  dependsOn:
+  - BuildActions
+  - BuildNLU
   jobs:
-  - deployment: DeployNLU
-    displayName: Deploy NLU
+  - job: DeployToAKS
+    displayName: Deploy
     pool:
-      vmImage: $(vmImageName)
-    environment: 'karthikx2rasacustomforms.default'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: KubernetesManifest@0
-            displayName: Create imagePullSecret
-            inputs:
-              action: createSecret
-              secretName: $(imagePullSecret)
-              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
-          - task: KubernetesManifest@0
-            displayName: Deploy to Kubernetes cluster
-            inputs:
-              action: deploy
-              manifests: |
-                $(Pipeline.Workspace)/manifests/deployment.yml
-                $(Pipeline.Workspace)/manifests/service.yml
-              imagePullSecrets: |
-                $(imagePullSecret)
-              containers: |
-                $(containerRegistry)/$(imageRepository):$(tag)
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: KubernetesManifest@0
+      displayName: Create imagePullSecret for rasacustomformsactions
+      inputs:
+        action: createSecret
+        secretName: 'x2container78551212-auth'
+        dockerRegistryEndpoint: 'dee01d6c-2a10-48ac-b011-4c5630267cdc' # Use the appropriate connection
+
+    - task: KubernetesManifest@0
+      displayName: Deploy rasacustomformsactions to Kubernetes cluster
+      inputs:
+        action: deploy
+        manifests: |
+          $(Pipeline.Workspace)/manifests/deployment-actions.yml
+          $(Pipeline.Workspace)/manifests/service-actions.yml
+        imagePullSecrets: |
+          x2container78551212-auth
+        containers: |
+          x2container.azurecr.io/rasacustomformsactions:$(Build.BuildId)
+
+    - task: KubernetesManifest@0
+      displayName: Create imagePullSecret for rasacustomformsnlu
+      inputs:
+        action: createSecret
+        secretName: 'x2container15463cd1-auth'
+        dockerRegistryEndpoint: 'b843bbb8-9286-45c2-90ec-3503cbc4f78e' # Use the appropriate connection
+
+    - task: KubernetesManifest@0
+      displayName: Deploy rasacustomformsnlu to Kubernetes cluster
+      inputs:
+        action: deploy
+        manifests: |
+          $(Pipeline.Workspace)/manifests/deployment.yml
+          $(Pipeline.Workspace)/manifests/service.yml
+        imagePullSecrets: |
+          x2container15463cd1-auth
+        containers: |
+          x2container.azurecr.io/rasacustomformsnlu:$(Build.BuildId)
