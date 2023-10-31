@@ -14,7 +14,7 @@ variables:
   dockerRegistryServiceConnection: 'dee01d6c-2a10-48ac-b011-4c5630267cdc'
   imageRepository: 'rasacustomformsactions'
   containerRegistry: 'x2container.azurecr.io'
-  dockerfilePath: '**/Dockerfile-actions'
+  dockerfilePath: '**/Dockerfile.test'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'x2container78551212-auth'
 
