@@ -4,59 +4,34 @@ trigger:
 pr: none # This disables Pull Request (PR) triggers, you can adjust it if needed
 
 stages:
-- stage: BuildActions
-  displayName: Build stage for rasacustomformsactions
+- stage: BuildAndDeploy
+  displayName: Build and Deploy
   jobs:
-  - job: BuildActions
-    displayName: Build
+  - job: BuildAndDeploy
+    displayName: Build and Deploy
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
-      inputs:
-        command: buildAndPush
-        repository: 'rasacustomformsactions'
-        dockerfile: '**/Dockerfile.test'
-        containerRegistry: 'dee01d6c-2a10-48ac-b011-4c5630267cdc' # Use the appropriate connection
-        tags: |
-          $(Build.BuildId)
+    - script: |
+        # Build and push the Docker image for your common code
+        docker build -t your-common-image:$(Build.BuildId) -f path/to/Dockerfile .
+        docker login -u $(acrUsername) -p $(acrPassword) youracr.azurecr.io
+        docker push youracr.azurecr.io/your-common-image:$(Build.BuildId)
+      displayName: 'Build and Push Docker Image'
+      env:
+        ACR_NAME: youracr
 
-- stage: BuildNLU
-  displayName: Build stage for rasacustomformsnlu
-  jobs:
-  - job: BuildNLU
-    displayName: Build
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: Docker@2
-      displayName: Build and push an image to container registry
-      inputs:
-        command: buildAndPush
-        repository: 'rasacustomformsnlu'
-        dockerfile: '**/Dockerfile.test'
-        containerRegistry: 'b843bbb8-9286-45c2-90ec-3503cbc4f78e' # Use the appropriate connection
-        tags: |
-          $(Build.BuildId)
-
-- stage: DeployToAKS
-  displayName: Deploy to Azure Kubernetes Service
-  dependsOn:
-  - BuildActions
-  - BuildNLU
-  jobs:
-  - job: DeployToAKS
-    displayName: Deploy
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
     - task: KubernetesManifest@0
-      displayName: Create imagePullSecret for rasacustomformsactions
+      displayName: Deploy your-common-image to Kubernetes cluster
       inputs:
-        action: createSecret
-        secretName: 'x2container78551212-auth'
-        dockerRegistryEndpoint: 'dee01d6c-2a10-48ac-b011-4c5630267cdc' # Use the appropriate connection
+        action: deploy
+        manifests: |
+          $(Pipeline.Workspace)/manifests/deployment-your-common-image.yml
+          $(Pipeline.Workspace)/manifests/service-your-common-image.yml
+        containers: |
+          youracr.azurecr.io/your-common-image:$(Build.BuildId)
+        imagePullSecrets: |
+          youracr-auth
 
     - task: KubernetesManifest@0
       displayName: Deploy rasacustomformsactions to Kubernetes cluster
@@ -71,13 +46,6 @@ stages:
           x2container.azurecr.io/rasacustomformsactions:$(Build.BuildId)
 
     - task: KubernetesManifest@0
-      displayName: Create imagePullSecret for rasacustomformsnlu
-      inputs:
-        action: createSecret
-        secretName: 'x2container15463cd1-auth'
-        dockerRegistryEndpoint: 'b843bbb8-9286-45c2-90ec-3503cbc4f78e' # Use the appropriate connection
-
-    - task: KubernetesManifest@0
       displayName: Deploy rasacustomformsnlu to Kubernetes cluster
       inputs:
         action: deploy
@@ -88,3 +56,4 @@ stages:
           x2container15463cd1-auth
         containers: |
           x2container.azurecr.io/rasacustomformsnlu:$(Build.BuildId)
+
