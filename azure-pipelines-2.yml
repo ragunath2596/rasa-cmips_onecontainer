@@ -33,27 +33,23 @@ stages:
         imagePullSecrets: |
           youracr-auth
 
+    - script: |
+        # Build and push the Docker image for your updated application
+        docker build -t your-updated-image:$(Build.BuildId) -f path/to/UpdatedDockerfile .
+        docker login -u $(acrUsername) -p $(acrPassword) youracr.azurecr.io
+        docker push youracr.azurecr.io/your-updated-image:$(Build.BuildId)
+      displayName: 'Build and Push Updated Docker Image'
+      env:
+        ACR_NAME: youracr
+
     - task: KubernetesManifest@0
-      displayName: Deploy rasacustomformsactions to Kubernetes cluster
+      displayName: Deploy your-updated-image to Kubernetes cluster
       inputs:
         action: deploy
         manifests: |
-          $(Pipeline.Workspace)/manifests/deployment-actions.yml
-          $(Pipeline.Workspace)/manifests/service-actions.yml
-        imagePullSecrets: |
-          x2container78551212-auth
+          $(Pipeline.Workspace)/manifests/deployment-updated-application.yml
+          $(Pipeline.Workspace)/manifests/service-updated-application.yml
         containers: |
-          x2container.azurecr.io/rasacustomformsactions:$(Build.BuildId)
-
-    - task: KubernetesManifest@0
-      displayName: Deploy rasacustomformsnlu to Kubernetes cluster
-      inputs:
-        action: deploy
-        manifests: |
-          $(Pipeline.Workspace)/manifests/deployment.yaml
-          $(Pipeline.Workspace)/manifests/service.yaml
+          youracr.azurecr.io/your-updated-image:$(Build.BuildId)
         imagePullSecrets: |
-          x2container15463cd1-auth
-        containers: |
-          x2container.azurecr.io/rasacustomformsnlu:$(Build.BuildId)
-
+          youracr-auth
