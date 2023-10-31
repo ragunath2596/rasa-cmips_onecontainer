@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: rasacustomformsactions
-          image: x2container.azurecr.io/rasacustomformsactions
+          image: x2container.azurecr.io/new-rasacustomformsactions-image:tag
           ports:
             - containerPort: 5055
           resources:
@@ -25,7 +25,7 @@ spec:
               cpu: 2000m
               memory: 1500Mi
         - name: rasacustomformsnlu
-          image: x2container.azurecr.io/rasacustomformsnlu
+          image: x2container.azurecr.io/new-rasacustomformsnlu-image:tag
           ports:
             - containerPort: 5005
           resources:
