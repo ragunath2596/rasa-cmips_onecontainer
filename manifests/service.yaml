@@ -1,21 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-    name: rasacustomformsactions
+  name: rasaonecontainer
 spec:
-    type: LoadBalancer
-    ports:
-    - port: 5055 
-    selector:
-        app: rasacustomformsactions
----
-apiVersion: v1
-kind: Service
-metadata:
-    name: rasacustomformsnlu
-spec:
-    type: LoadBalancer
-    ports:
-    - port: 5005 
-    selector:
-        app: rasacustomformsnlu
+  type: LoadBalancer
+  ports:
+    - port: 5055
+    - port: 5005
+  selector:
+    app: rasaonecontainer
