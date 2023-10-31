@@ -39,4 +39,4 @@ EXPOSE 5055
 EXPOSE 5005
 
 # Define the entry point for your application
-CMD ["/app/cmips_actions.sh"]
+CMD ["/app/cmips_onecontainer.sh"]
