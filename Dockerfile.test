@@ -1,35 +1,42 @@
 FROM python:3.8
 
+# Set the working directory
 WORKDIR /app
 
+# Copy the application code into the image
 COPY ./ /app
 
-RUN apt update && apt install pre-commit  -y
+# Update the package list and install pre-commit
+RUN apt update && apt install pre-commit -y
 
+# Install Python dependencies
 RUN pip install -r requirements.txt
 
+# Replace twilio_voice.py with the custom version
 RUN cd /usr/local/lib/python3.8/site-packages/rasa/core/channels && \
     mv twilio_voice.py twilio_voice.py.old && \
     cp /app/utils/twilio_voice.py . && \
-    ls -ltr && \
     cd /app
 
-#RUN pip install -r requirements-dev.txt
-
+# Install pre-commit hooks
 RUN pre-commit install
 
+# Download the spaCy model
 RUN python3 -m spacy download en_core_web_md
 
-#RUN python3 -m spacy link en_core_web_md en
-
-RUN rasa train
-
+# Copy the rest of the application code
 COPY . .
 
+# Set execute permissions for your scripts
+RUN chmod 777 cmips_actions.sh
 RUN chmod 777 cmips_nlu.sh
 
-RUN ls -ltr && pwd
+# Train your Rasa models
+RUN rasa train
 
-ENTRYPOINT ["/app/cmips_nlu.sh"]
-
+# Expose the necessary ports
+EXPOSE 5055
 EXPOSE 5005
+
+# Define the entry point for your application
+CMD ["/app/cmips_actions.sh"]
