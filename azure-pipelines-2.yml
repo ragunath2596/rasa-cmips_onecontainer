@@ -21,7 +21,6 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
-
 stages:
 - stage: Build
   displayName: Build stage
@@ -64,6 +63,15 @@ stages:
               action: createSecret
               secretName: $(imagePullSecret)
               dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - script: echo 'CMD ["./cmips_actions.sh"]' > Dockerfile-actions-updated
+            displayName: Set CMD in Dockerfile
+
+          - script: cat Dockerfile-actions >> Dockerfile-actions-updated
+            displayName: Append Dockerfile
+
+          - script: mv Dockerfile-actions-updated $(dockerfilePath)
+            displayName: Replace Dockerfile
 
           - task: KubernetesManifest@0
             displayName: Deploy to Kubernetes cluster
