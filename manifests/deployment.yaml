@@ -6,11 +6,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rasacustomforms
+      app: rasaonecontainer
   template:
     metadata:
       labels:
-        app: rasacustomforms
+        app: rasaonecontainer
     spec:
       containers:
         - name: rasacustomformsactions
