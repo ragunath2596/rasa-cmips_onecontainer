@@ -8,7 +8,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: 'dee01d6c-2a10-48ac-b011-4c5630267cdc'
+  dockerRegistryServiceConnection: '3271d7e6-2828-444a-b496-b55c8a795d9e'
   imageRepository: 'rasacustomformsactions'
   containerRegistry: 'x2container.azurecr.io'
   dockerfilePath: '**/Dockerfile.test'
