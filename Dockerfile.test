@@ -18,6 +18,6 @@ RUN chmod 777 cmips_nlu.sh
 
 RUN ls -ltr && pwd
 
-ENTRYPOINT ["/app/cmips_nlu.sh"]
+ENTRYPOINT ["/app/cmips.sh"]
 
 EXPOSE 5005
