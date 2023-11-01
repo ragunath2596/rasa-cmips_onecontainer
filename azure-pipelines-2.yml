@@ -1,55 +1,71 @@
 trigger:
-- rasa-cmips_onecontainer
+- main
 
-pr: none # This disables Pull Request (PR) triggers, you can adjust it if needed
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: '9e32f3f5-4f7e-422b-89a8-2e438a51fee9'
+  imageRepository: 'ragunathrasacmipsonecontainer'
+  containerRegistry: 'x2container.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
 
 stages:
-- stage: BuildAndDeploy
-  displayName: Build and Deploy
+- stage: Build
+  displayName: Build and push stage
   jobs:
-  - job: BuildAndDeploy
-    displayName: Build and Deploy
+  - job: Build
+    displayName: Build
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: $(vmImageName)
     steps:
-    - script: |
-        # Build and push the Docker image for your common code
-        docker build -t your-common-image:$(Build.BuildId) -f path/to/Dockerfile .
-        docker login -u $(acrUsername) -p $(acrPassword) youracr.azurecr.io
-        docker push youracr.azurecr.io/your-common-image:$(Build.BuildId)
-      displayName: 'Build and Push Docker Image'
-      env:
-        ACR_NAME: youracr
-
-    - task: KubernetesManifest@0
-      displayName: Deploy your-common-image to Kubernetes cluster
+    - task: Docker@2
+      displayName: Build and push an image to container registry
       inputs:
-        action: deploy
-        manifests: |
-          $(Pipeline.Workspace)/manifests/deployment-your-common-image.yml
-          $(Pipeline.Workspace)/manifests/service-your-common-image.yml
-        containers: |
-          youracr.azurecr.io/your-common-image:$(Build.BuildId)
-        imagePullSecrets: |
-          youracr-auth
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
 
-    - script: |
-        # Build and push the Docker image for your updated application
-        docker build -t your-updated-image:$(Build.BuildId) -f path/to/UpdatedDockerfile .
-        docker login -u $(acrUsername) -p $(acrPassword) youracr.azurecr.io
-        docker push youracr.azurecr.io/your-updated-image:$(Build.BuildId)
-      displayName: 'Build and Push Updated Docker Image'
-      env:
-        ACR_NAME: youracr
+    - upload: manifests
+      artifact: manifests
 
-    - task: KubernetesManifest@0
-      displayName: Deploy your-updated-image to Kubernetes cluster
-      inputs:
-        action: deploy
-        manifests: |
-          $(Pipeline.Workspace)/manifests/deployment-updated-application.yml
-          $(Pipeline.Workspace)/manifests/service-updated-application.yml
-        containers: |
-          youracr.azurecr.io/your-updated-image:$(Build.BuildId)
-        imagePullSecrets: |
-          youracr-auth
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'rasaonecontainer'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              secretName: $(imagePullSecret)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              manifests: |
+                $(Pipeline.Workspace)/manifests/deployment.yml
+                $(Pipeline.Workspace)/manifests/service.yml
+              imagePullSecrets: |
+                $(imagePullSecret)
+              containers: |
+                $(containerRegistry)/$(imageRepository):$(tag)
