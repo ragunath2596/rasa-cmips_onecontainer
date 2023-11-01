@@ -1,26 +1,20 @@
 apiVersion : apps/v1
 kind: Deployment
 metadata:
-  name: rasacustomformsnlu 
+  name: onecontainer 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rasacustomformsnlu
+      app: onecontainer
   template:
     metadata:
       labels:
-        app: rasacustomformsnlu 
+        app: xresearchrasaone 
     spec:
       containers:
-        - name: rasacustomformsnlu 
-          image: x2container.azurecr.io/rasacustomformsnlu
+        - name: onecontainer 
+          image: x2container.azurecr.io/onecontainer
           ports:
           - containerPort: 5005
-          resources:
-            requests:
-              cpu: 200m
-              memory: 2000Mi
-            limits:
-              cpu: 3500m
-              memory: 4000Mi
+          - containerPort: 5055
