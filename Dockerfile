@@ -27,8 +27,8 @@ RUN rasa train
 COPY . .
 
 # Set execute permissions for your scripts
-RUN chmod 777 cmips_actions.sh
-RUN chmod 777 cmips_nlu.sh
+RUN chmod 777 cmips
+RUN chmod 777 cmips
 
 # Train your Rasa models
 RUN rasa train
