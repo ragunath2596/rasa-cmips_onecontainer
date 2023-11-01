@@ -53,7 +53,7 @@ stages:
     displayName: Deploy
     pool:
       vmImage: $(vmImageName)
-    environment: 'karthikx2rasacustomforms.default'
+    environment: rasaonecontainer'
     strategy:
       runOnce:
         deploy:
