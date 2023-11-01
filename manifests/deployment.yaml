@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rasacmipsonecontainer
+  name: rasaonecontainer
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rasacmipsonecontainer
+      app: rasaonecontainer
   template:
     metadata:
       labels:
-        app: rasacmipsonecontainer
+        app: rasaonecontainer
     spec:
       containers:
-      - name: rasacmipsonecontainer
-        image: x2container.azurecr.io/ragunathrasacmipsonecontainer
+      - name: rasaonecontainer
+        image: x2container.azurecr.io/rasaonecontainer
         ports:
         - containerPort: 5005
         - containerPort: 5055
