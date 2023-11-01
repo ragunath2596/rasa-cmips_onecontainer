@@ -14,22 +14,16 @@ RUN cd /usr/local/lib/python3.8/site-packages/rasa/core/channels && \
     ls -ltr && \
     cd /app
 
-#RUN pip install -r requirements-dev.txt
-
 RUN pre-commit install
 
 RUN python3 -m spacy download en_core_web_md
-
-#RUN python3 -m spacy link en_core_web_md en
 
 RUN rasa train
 
 COPY . .
 
-RUN chmod 777 cmips_nlu.sh
+RUN chmod 777 rasa.sh
 
-RUN ls -ltr && pwd
+ENTRYPOINT ["/app/rasa.sh"]
 
-ENTRYPOINT ["/app/cmips_nlu.sh"]
-
-EXPOSE 5005
+EXPOSE 5005 5055
