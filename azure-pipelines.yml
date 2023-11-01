@@ -12,7 +12,7 @@ variables:
 
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: 'b843bbb8-9286-45c2-90ec-3503cbc4f78e'
-  imageRepository: 'rasacustomformsnlu'
+  imageRepository: 'rasaonecontainer'
   containerRegistry: 'x2container.azurecr.io'
   dockerfilePath: '**/Dockerfile'
   tag: '$(Build.BuildId)'
